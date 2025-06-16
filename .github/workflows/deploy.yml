@@ -1,0 +1,29 @@
+name: Deploy React App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚀 Клонирование репозитория
+      uses: actions/checkout@v3
+
+    - name: ⚙️ Установка Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: 🔑 Подключение к серверу и деплой
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H 109.107.157.184 >> ~/.ssh/known_hosts
+        bash deploy.sh

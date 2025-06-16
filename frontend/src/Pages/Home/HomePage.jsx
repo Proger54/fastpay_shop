@@ -2,13 +2,58 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
+import { fetchApi } from '../../API/api';
+
 import PaginatedTable from '../../Components/PaginatedTable';
 import CreatePaymentModal from '../../Components/CreatePaymentModal';
 
 const HomePage = () => {
     const [modalCreateVisible, setModalCreateVisible] = useState(false);
     const [modalOutVisible, setModalOutVisible] = useState(false);
+    const [loadingInfo, setLoadingInfo] = useState(true);
+    const [headerData, setHeaderData] = useState(null);
+    const [loadingPayment, setLoadingPayment] = useState(true);
+    const [paymentData, setPaymentData] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchInfo = async () => {
+            setLoadingInfo(true);
+            try {
+                const result = await fetchApi({
+                    url: `/api/v1/dashboard/info`,
+                });
+                setHeaderData(result);
+                localStorage.setItem("sp_name", result.name);
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+            } finally {
+                setLoadingInfo(false);
+            }
+        }
+
+        fetchInfo();
+    }, [])
+
+    useEffect(() => {
+        const fetchPayment = async () => {
+            setLoadingPayment(true);
+            try {
+                const result = await fetchApi({
+                    url: `/api/v1/dashboard/payment/`,
+                    params: { page: currentPage, page_size: 5 },
+                });
+                setPaymentData(result);
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+            } finally {
+                setLoadingPayment(false);
+            }
+        }
+
+        fetchPayment();
+    }, [currentPage])
 
     useEffect(() => {
         const canvas = document.querySelector(".stars-bg-canvas");
@@ -61,24 +106,15 @@ const HomePage = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-
-    const sampleData = [
-        { id: '#001', rub: 1000, usdt: 10, status: 'success', statusName: 'Успешно' },
-        { id: '#002', rub: 2000, usdt: 20, status: 'success', statusName: 'Успешно' },
-        { id: '#003', rub: 1500, usdt: 15, status: 'pending', statusName: 'Ожидание' },
-        { id: '#004', rub: 500, usdt: 5, status: 'failed', statusName: 'Ошибка' },
-        { id: '#005', rub: 800, usdt: 8, status: 'success', statusName: 'Успешно' },
-        { id: '#006', rub: 1200, usdt: 12, status: 'success', statusName: 'Успешно' },
-        { id: '#007', rub: 300, usdt: 3, status: 'pending', statusName: 'Ожидание' },
-        { id: '#001', rub: 1000, usdt: 10, status: 'success', statusName: 'Успешно' },
-        { id: '#002', rub: 2000, usdt: 20, status: 'success', statusName: 'Успешно' },
-        { id: '#003', rub: 1500, usdt: 15, status: 'pending', statusName: 'Ожидание' },
-        { id: '#004', rub: 500, usdt: 5, status: 'failed', statusName: 'Ошибка' },
-        { id: '#005', rub: 800, usdt: 8, status: 'success', statusName: 'Успешно' },
-        { id: '#006', rub: 1200, usdt: 12, status: 'success', statusName: 'Успешно' },
-        { id: '#007', rub: 300, usdt: 3, status: 'pending', statusName: 'Ожидание' },
-    ];
-
+    const formatNumber = (number) => {
+        if (number) {
+            return number.toLocaleString('ru-RU', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).replace(',', '.');
+        }
+        return number;
+    }
 
     return (
         <div className="home-container">
@@ -87,10 +123,10 @@ const HomePage = () => {
 
             <header className="home-header">
                 <div className="home-header-left">
-                    <h2>Магазин На Углу</h2>
+                    <h2>{loadingInfo ? localStorage.getItem("sp_name") : headerData?.name}</h2>
                     <div className="home-balance">
                         <p>Баланс</p>
-                        <span>98882 USDT</span>
+                        <span>{formatNumber(headerData?.balance)} USDT</span>
                     </div>
                 </div>
                 <button className="home-profile-icon" aria-label="Профиль" onClick={() => navigate('/profile')}>
@@ -130,7 +166,9 @@ const HomePage = () => {
             </div>
 
             <main className="home-main">
-                <PaginatedTable data={sampleData} />
+                {!loadingPayment && (
+                    <PaginatedTable data={paymentData} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                )}
             </main>
         </div>
     );

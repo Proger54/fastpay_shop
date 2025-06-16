@@ -153,20 +153,27 @@
     color: white;
 }
 
-/* .action-button {
-    display: inline-flex;
+.qr-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 12, 41, 0.95);
+    display: flex;
     align-items: center;
-    gap: 8px;
-    background: #302b63;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
+    justify-content: center;
+    z-index: 1000;
     cursor: pointer;
-    transition: background 0.3s ease;
 }
 
-.action-button:hover {
-    background: #474174;
-} */
+.qr-wrapper {
+    text-align: center;
+    color: white;
+}
+
+.qr-instruction {
+    margin-top: 20px;
+    font-size: 18px;
+    opacity: 0.8;
+}

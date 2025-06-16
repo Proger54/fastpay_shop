@@ -36,8 +36,7 @@ export const AuthHeader = async () => {
 };
 
 
-export const requestOfficeToken = async ({ secretKey, code, onLogin, setIsLoading, navigate }) => {
-    setIsLoading(true);
+export const requestOfficeToken = async ({ secretKey, code }) => {
     try {
         const timestamp = Math.floor(Date.now() / 1000);
         const method = "PUT";
@@ -71,9 +70,7 @@ export const requestOfficeToken = async ({ secretKey, code, onLogin, setIsLoadin
             localStorage.setItem('sp_secretKey', secretKey);
             localStorage.setItem('sp_token', token);
             localStorage.setItem('sp_type', type);
-            onLogin();
             console.log('Успешный вход');
-            navigate("/");
             return response.data;
         } else {
             throw new Error('Неверный ключ или код');
@@ -81,8 +78,6 @@ export const requestOfficeToken = async ({ secretKey, code, onLogin, setIsLoadin
     } catch (error) {
         console.error('Ошибка при запросе:', error);
         throw error;
-    } finally {
-        setIsLoading(false); 
     }
 };
 
@@ -91,31 +86,67 @@ export const fetchApi = async ({
     method = 'GET',
     data = {},
     params = {},
-  } = {}) => {
+} = {}) => {
     try {
-      const { auth, timestamp, token, type } = await AuthHeader();
-  
-      const response = await axios({
+        const { auth, timestamp, token, type } = await AuthHeader();
+
+        const response = await axios({
+            method,
+            url,
+            data, // Тело запроса для POST
+            params, // Параметры для GET (например, ?page=1)
+            headers: {
+                'FP-Authorization': auth,
+                'FP-Timestamp': timestamp,
+                'FP-Token': token,
+                'FP-Type': type,
+                ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }), // Добавляем Content-Type только для POST
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка:', error);
+        throw error;
+    }
+};
+
+
+export const createPayment = async ({ amount, typePay }) => {
+    const token = localStorage.getItem('sp_token');
+    const secretKey = localStorage.getItem('sp_secretKey');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    const dataToSign = `${token}${timestamp}`;
+
+    const crypto = require('crypto-js');
+    const signature = crypto.HmacSHA256(dataToSign, secretKey).toString(crypto.enc.Hex);
+
+    const method = "POST";
+    const url = "/api/v1/merch/create/pay";
+    const data = {
+        amount : amount,
+        type_pay : typePay,
+        result_url : "https://ya.ru"
+    }
+    const params = {}
+
+    const response = await axios({
         method,
         url,
-        data, // Тело запроса для POST
-        params, // Параметры для GET (например, ?page=1)
+        data,
+        params,
         headers: {
-          'FP-Authorization': auth,
-          'FP-Timestamp': timestamp,
-          'FP-Token': token,
-          'FP-Type': type,
-          ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }), // Добавляем Content-Type только для POST
+            'FP-Signature': signature,
+            'FP-Timestamp': timestamp,
+            'FP-Token': token,
+            ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }),
         },
-      });
-  
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка:', error);
-      throw error;
-    }
-  };
+    });
 
+    return response.data;
+
+}
 
 // Добавление устройства
 export const handleAddDevice = async ({ nameDevice }) => {

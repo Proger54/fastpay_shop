@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
+
+import { requestOfficeToken } from '../../API/api';
+
 import LoginSvg from '../../assets/secure-login.svg';
 
 const LoginPage = () => {
@@ -29,21 +32,23 @@ const LoginPage = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         const fullCode = code.join('');
         if (secret && fullCode.length === 6) {
-            setIsLoading(true);
-            setTimeout(() => {
-                setIsLoading(false);
+            try {
+                await requestOfficeToken({ secretKey: secret, code: fullCode });
                 setLoginSuccess(true);
-
-                // Переходим через 1.5 секунды после успешного входа
                 setTimeout(() => {
                     navigate("/");
                 }, 1500);
-
-            }, 2000);
+            } catch (err) {
+                console.log('Полная ошибка:', err.response);
+                console.log('Данные ответа сервера:', err.response?.data);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
