@@ -15,7 +15,7 @@ ssh $SERVER_USER@$SERVER_IP "mkdir -p $PROJECT_DIR"
 echo "📂 Создали папку проекта"
 
 echo "📦 Загружаем весь проект в папку проекта"
-rsync -av --exclude 'node_modules' --exclude '.git' --exclude '.github' ./payment/ $SERVER_USER@$SERVER_IP:$PROJECT_DIR/
+rsync -av --exclude 'node_modules' --exclude '.git' --exclude '.github' ./frontend/ $SERVER_USER@$SERVER_IP:$PROJECT_DIR/
 rsync -av --exclude 'node_modules' --exclude '.git' --exclude '.github' ./docker/nginx/site.conf $SERVER_USER@$SERVER_IP:$NGINX_CONF
 echo "📦 Загрузили проект на сервер"
 
