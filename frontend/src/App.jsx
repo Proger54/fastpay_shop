@@ -13,7 +13,7 @@ function App() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    user_token = localStorage.getItem(sp_token);
+    const user_token = localStorage.getItem("sp_token");
     if (!user_token) {
       navigate("/login");
     }
