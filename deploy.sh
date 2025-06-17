@@ -4,9 +4,9 @@
 set -e
 
 SERVER_USER="root"  # Имя пользователя на сервере
-SERVER_IP="109.107.157.184"  # IP-адрес сервера
-PROJECT_DIR="/var/new/3ds-payment.ru"  # Папка, где будет храниться фронт
-NGINX_CONF="/etc/nginx/sites-available/app.3ds-payment.ru"  # Путь к конфигу Nginx
+SERVER_IP="185.231.69.171"  # IP-адрес сервера
+PROJECT_DIR="/var/www/shopy.ink"  # Папка, где будет храниться фронт
+NGINX_CONF="/etc/nginx/sites-available/shopy.ink"  # Путь к конфигу Nginx
 
 echo "⏳ Подключаемся к серверу и настраиваем деплой..."
 
