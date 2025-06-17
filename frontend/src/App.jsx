@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import LoginPage from "./LoginPage";
-import HomePage from "./HomePage";
-import ProfilePage from "./ProfilePage";
-import NotFound404 from "./NotFound404";
+
+import NotFound404 from './Pages/NotFound404/NotFound404';
+import LoginPage from './Pages/Login/LoginPage';
+import HomePage from './Pages/Home/HomePage';
+import ProfilePage from './Pages/Profile/ProfilePage';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ function AppContent() {
 
   useEffect(() => {
     const user_token = localStorage.getItem("sp_token");
-    
+
     if (!user_token && location.pathname !== "/login") {
       navigate("/login");
     }
