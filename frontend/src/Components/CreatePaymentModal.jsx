@@ -22,11 +22,17 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
 
   };
 
+  const handleClose = () => {
+    setAmount("");
+    setPayLink(null);
+    onClose();
+  }
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       {!payLink && (
         <div className="modal-content" onClick={e => e.stopPropagation()}>
-          <button className="modal-close" onClick={onClose} aria-label="Закрыть">&times;</button>
+          <button className="modal-close" onClick={handleClose} aria-label="Закрыть">&times;</button>
           <h3>{payIn ? "Создать платеж" : "Запросить вывод"}</h3>
           <form onSubmit={handleSubmit}>
             <label>
