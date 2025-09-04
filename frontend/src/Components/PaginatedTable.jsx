@@ -18,7 +18,10 @@ const PaginatedTable = ({ data, itemsPerPage = 5, currentPage, setCurrentPage })
 
     const truncateString = (str) => {
         if (!str) return '';
-        return str.length > 7 ? str.slice(0, 7) + '...' : str;
+        // Проверяем ширину экрана
+        const isSmallScreen = window.innerWidth < 768;
+        // Если экран маленький, обрезаем, если большой - показываем полностью
+        return isSmallScreen && str.length > 7 ? str.slice(0, 7) + '...' : str;
     };
 
     const copyToClipboard = async (text) => {
@@ -107,8 +110,7 @@ const PaginatedTable = ({ data, itemsPerPage = 5, currentPage, setCurrentPage })
                                 </div>
                             </td>
                             <td>
-                                <p className="rub">{formatNumber(item.amount)} RUB</p>
-                                <p className="usdt">{formatNumber(item.amount_usdt)} USDT</p>
+                                <p className="rub">{formatNumber(item.amount)} {item.currency}</p>
                             </td>
                             <td className={`status ${statusClass(item.status)}`}>{statusText(item.status)}</td>
                         </tr>

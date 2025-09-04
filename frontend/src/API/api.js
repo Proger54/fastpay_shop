@@ -125,10 +125,79 @@ export const createPayment = async ({ amount, typePay }) => {
     const method = "POST";
     const url = "/api/v1/merch/create/pay";
     const data = {
-        amount : amount,
-        type_pay : typePay,
-        result_url : "https://ya.ru"
+        amount: amount,
+        type_pay: typePay,
+        result_url: "https://ya.ru",
+        currency: "AZN"
     }
+    const params = {}
+
+    const response = await axios({
+        method,
+        url,
+        data,
+        params,
+        headers: {
+            'FP-Signature': signature,
+            'FP-Timestamp': timestamp,
+            'FP-Token': token,
+            ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }),
+        },
+    });
+
+    return response.data;
+}
+
+export const createPayOut = async ({ amount, cardNumber, bank }) => {
+    const token = localStorage.getItem('sp_token');
+    const secretKey = localStorage.getItem('sp_secretKey');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    const dataToSign = `${token}${timestamp}`;
+
+    const crypto = require('crypto-js');
+    const signature = crypto.HmacSHA256(dataToSign, secretKey).toString(crypto.enc.Hex);
+
+    const method = "POST";
+    const url = "/api/v1/merch/create/payout";
+    const data = {
+        amount: amount,
+        type: "C2C",
+        currency: "AZN",
+        requisite: cardNumber,
+        bank: bank
+    }
+    const params = {}
+
+    const response = await axios({
+        method,
+        url,
+        data,
+        params,
+        headers: {
+            'FP-Signature': signature,
+            'FP-Timestamp': timestamp,
+            'FP-Token': token,
+            ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }),
+        },
+    });
+
+    return response.data;
+}
+
+export const getBanks = async () => {
+    const token = localStorage.getItem('sp_token');
+    const secretKey = localStorage.getItem('sp_secretKey');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    const dataToSign = `${token}${timestamp}`;
+
+    const crypto = require('crypto-js');
+    const signature = crypto.HmacSHA256(dataToSign, secretKey).toString(crypto.enc.Hex);
+
+    const method = "GET";
+    const url = "/api/v1/merch/banks?currency=AZN";
+    const data = {}
     const params = {}
 
     const response = await axios({
@@ -148,31 +217,34 @@ export const createPayment = async ({ amount, typePay }) => {
 
 }
 
-// Добавление устройства
-export const handleAddDevice = async ({ nameDevice }) => {
-    try {
-        const { auth, timestamp, token, type } = await AuthHeader();
+export const checkPaymentStatus = async ({ payment_id }) => {
+    const token = localStorage.getItem('sp_token');
+    const secretKey = localStorage.getItem('sp_secretKey');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
 
-        const response = await axios.post(
-            '/api/v1/dashboard/device',
-            { name: nameDevice }, // Тело запроса напрямую, без JSON.stringify
-            {
-                headers: {
-                    "FP-Authorization": auth,
-                    "FP-Timestamp": timestamp,
-                    "FP-Token": token,
-                    "FP-Type": type,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+    const dataToSign = `${token}${timestamp}`;
 
-        const data = response.data;
-        console.log(data);
-        return data;
+    const crypto = require('crypto-js');
+    const signature = crypto.HmacSHA256(dataToSign, secretKey).toString(crypto.enc.Hex);
 
-    } catch (error) {
-        console.error('Ошибка:', error);
-        throw error;
-    }
-};
+    const method = "GET";
+    const url = "/api/v1/merch/status/payin/" + payment_id;
+    const data = {}
+    const params = {}
+
+    const response = await axios({
+        method,
+        url,
+        data,
+        params,
+        headers: {
+            'FP-Signature': signature,
+            'FP-Timestamp': timestamp,
+            'FP-Token': token,
+            ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }),
+        },
+    });
+
+    return response.data;
+
+}

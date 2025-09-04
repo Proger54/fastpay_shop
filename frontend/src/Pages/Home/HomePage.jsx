@@ -42,7 +42,7 @@ const HomePage = () => {
             try {
                 const result = await fetchApi({
                     url: `/api/v1/dashboard/payment/`,
-                    params: { page: currentPage, page_size: 5 },
+                    params: { page: currentPage, page_size: 15 },
                 });
                 setPaymentData(result);
             } catch (error) {
@@ -106,15 +106,13 @@ const HomePage = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const formatNumber = (number) => {
-        if (number) {
-            return number.toLocaleString('ru-RU', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }).replace(',', '.');
-        }
-        return number;
-    }
+    const handleLogout = () => {
+        localStorage.removeItem('sp_name');
+        localStorage.removeItem('sp_secretKey');
+        localStorage.removeItem('sp_token');
+        localStorage.removeItem('sp_type');
+        navigate('/login');
+    };
 
     return (
         <div className="home-container">
@@ -124,19 +122,9 @@ const HomePage = () => {
             <header className="home-header">
                 <div className="home-header-left">
                     <h2>{loadingInfo ? localStorage.getItem("sp_name") : headerData?.name}</h2>
-                    <div className="home-balance">
-                        <p>Баланс</p>
-                        <span>{formatNumber(headerData?.balance)} USDT</span>
-                    </div>
                 </div>
-                <button className="home-profile-icon" aria-label="Профиль" onClick={() => navigate('/profile')}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                        className="feather feather-user">
-                        <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
+                <button className="logout-btn" onClick={handleLogout}>
+                    Выйти из аккаунта
                 </button>
             </header>
 
@@ -160,7 +148,7 @@ const HomePage = () => {
                         <polyline points="16 17 21 12 16 7" />
                         <line x1="21" y1="12" x2="9" y2="12" />
                     </svg>
-                    Запросить вывод
+                    Создать вывод
                 </button>
                 <CreatePaymentModal visible={modalOutVisible} onClose={() => setModalOutVisible(false)} payIn={false} />
             </div>

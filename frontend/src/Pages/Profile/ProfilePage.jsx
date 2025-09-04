@@ -87,35 +87,15 @@ const ProfilePage = () => {
         navigate('/login');
     };
 
-    const formatNumber = (number) => {
-        if (number) {
-            return number.toLocaleString('ru-RU', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }).replace(',', '.');
-        }
-        return number;
-    }
-
     return (
         <div className="profile-container">
             <canvas className="stars-bg-canvas"></canvas>
             <header className="home-header">
                 <div className="home-header-left" onClick={() => navigate('/')}>
                     <h2>{loadingInfo ? localStorage.getItem("sp_name") : headerData?.name}</h2>
-                    <div className="home-balance">
-                        <p>Баланс</p>
-                        <span>{formatNumber(headerData?.balance)} USDT</span>
-                    </div>
                 </div>
-                <button className="home-profile-icon" aria-label="Профиль">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                        className="feather feather-user">
-                        <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
+                <button className="logout-btn" onClick={handleLogout}>
+                    Выйти из аккаунта
                 </button>
             </header>
 
@@ -123,12 +103,7 @@ const ProfilePage = () => {
                 <h3>Профиль пользователя</h3>
 
                 <div className="stats-box">
-                    {headerData?.rates.map((item, index) => (
-                        <div className="stat-item" key={index}>
-                            <p>Ставка {item.mode} от {item.min} {item.currency}</p>
-                            <span>{item.rate}%</span>
-                        </div>
-                    ))}
+                    <h4>{headerData?.name}</h4>
                 </div>
 
                 <button className="logout-btn" onClick={handleLogout}>

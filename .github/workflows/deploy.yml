@@ -7,7 +7,12 @@ on:
 
 jobs:
   deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
+    env:
+      SERVER_IP: ${{ secrets.IP }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
     - name: 🚀 Клонирование репозитория
@@ -18,12 +23,21 @@ jobs:
       with:
         node-version: 18
 
-    - name: 🔑 Подключение к серверу и деплой
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Установка зависимостей
+      run: npm ci
+      working-directory: frontend
+
+    - name: Сборка проекта
+      run: CI=false npm run build
+      working-directory: frontend
+
+    - name: 🔐 Проверка SSH
       run: |
         mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        echo "$SERVER_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H 185.231.69.171 >> ~/.ssh/known_hosts
-        bash deploy.sh
+        ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+    - name: 🚀 Перенос файлов
+      run: |
+        rsync -az --delete --exclude '.git' frontend/build/ $SERVER_USER@$SERVER_IP:/var/www/shopy.ink/
