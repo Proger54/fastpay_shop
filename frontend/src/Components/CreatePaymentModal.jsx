@@ -3,8 +3,10 @@ import './Components.css';
 
 import { createPayment, createPayOut, getBanks } from '../API/api';
 import PaymentCardModal from './PaymentCardModal';
+import { useTranslation } from '../hooks/useTranslation';
 
 export default function CreatePaymentModal({ visible, onClose, payIn }) {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardError, setCardError] = useState('');
@@ -61,11 +63,11 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
     if (cleanNumber.length === 0) {
       setCardError('');
     } else if (cleanNumber.length < 13) {
-      setCardError('Номер карты слишком короткий');
+      setCardError(t('createPaymentModal.cardTooShort'));
     } else if (cleanNumber.length > 19) {
-      setCardError('Номер карты слишком длинный');
+      setCardError(t('createPaymentModal.cardTooLong'));
     } else if (!validateCardNumber(value)) {
-      setCardError('Неверный номер карты');
+      setCardError(t('createPaymentModal.invalidCard'));
     } else {
       setCardError('');
     }
@@ -77,15 +79,15 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
     // Валидация для вывода
     if (!payIn) {
       if (!cardNumber.trim()) {
-        setError('Введите номер карты');
+        setError(t('createPaymentModal.enterCardNumber'));
         return;
       }
       if (!validateCardNumber(cardNumber)) {
-        setError('Неверный номер карты');
+        setError(t('createPaymentModal.invalidCard'));
         return;
       }
       if (!selectedBank) {
-        setError('Выберите банк');
+        setError(t('createPaymentModal.selectBankError'));
         return;
       }
     }
@@ -100,7 +102,7 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
         if (result?.payment_id) {
           setDataPayment(result);
         } else {
-          throw new Error('Ошибка при создании платежа');
+          throw new Error(t('createPaymentModal.paymentError'));
         }
       } else {
         const result = await createPayOut({
@@ -112,12 +114,12 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
         if (result?.id) {
           setDataPayment(result);
         } else {
-          throw new Error('Ошибка при создании вывода');
+          throw new Error(t('createPaymentModal.withdrawalError'));
         }
       }
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Произошла ошибка');
+      setError(err.message || t('createPaymentModal.generalError'));
     } finally {
       setLoading(false);
     }
@@ -139,16 +141,16 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
     <div className="modal-overlay" onClick={dataPayment ? null : handleClose}>
       {!dataPayment && (
         <div className="modal-content" onClick={e => e.stopPropagation()}>
-          <button className="modal-close" onClick={handleClose} aria-label="Закрыть">&times;</button>
-          <h3>{payIn ? "Создать платеж" : "Создать вывод"}</h3>
+          <button className="modal-close" onClick={handleClose} aria-label={t('createPaymentModal.close')}>&times;</button>
+          <h3>{payIn ? t('createPaymentModal.createPayment') : t('createPaymentModal.createWithdrawal')}</h3>
           <form onSubmit={handleSubmit}>
             <label>
-              Сумма:
+              {t('createPaymentModal.amount')}
               <input
                 type="number"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
-                placeholder="Введите сумму"
+                placeholder={t('createPaymentModal.enterAmount')}
                 min="0"
                 step="0.01"
                 required
@@ -159,12 +161,12 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
             {!payIn && (
               <div className="withdrawal-fields">
                 <label>
-                  Номер карты:
+                  {t('createPaymentModal.cardNumber')}
                   <input
                     type="text"
                     value={cardNumber}
                     onChange={handleCardNumberChange}
-                    placeholder="1234 5678 9012 3456"
+                    placeholder={t('createPaymentModal.cardPlaceholder')}
                     maxLength="19"
                     required
                     className={cardError ? 'error' : ''}
@@ -173,13 +175,13 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
                 </label>
 
                 <label>
-                  Банк:
+                  {t('createPaymentModal.bank')}
                   <select
                     value={selectedBank}
                     onChange={e => setSelectedBank(e.target.value)}
                     required
                   >
-                    <option value="">Выберите банк</option>
+                    <option value="">{t('createPaymentModal.selectBank')}</option>
                     {banks?.banks?.map(bank => (
                       <option key={bank.name} value={bank.name}>
                         {bank.name_full}
@@ -199,7 +201,7 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
               {loading ? (
                 <span className="loading-spinner loading-spinner-large"></span>
               ) : (
-                'Подтвердить'
+                t('createPaymentModal.confirm')
               )}
             </button>
           </form>
@@ -215,39 +217,39 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
       {dataPayment && !payIn && (
         <div className="withdrawal-success-modal">
           <div className="withdrawal-success-content">
-            <h3>Заявка на вывод создана!</h3>
+            <h3>{t('createPaymentModal.withdrawalCreated')}</h3>
 
             <div className="withdrawal-details">
               <div className="detail-item">
-                <span className="label">Сумма:</span>
+                <span className="label">{t('createPaymentModal.amountLabel')}</span>
                 <span className="value">{amount} AZN</span>
               </div>
 
               <div className="detail-item">
-                <span className="label">Номер карты:</span>
+                <span className="label">{t('createPaymentModal.cardNumberLabel')}</span>
                 <span className="value">{cardNumber}</span>
               </div>
 
               <div className="detail-item">
-                <span className="label">Банк:</span>
+                <span className="label">{t('createPaymentModal.bankLabel')}</span>
                 <span className="value">
                   {banks?.banks?.find(bank => bank.name === selectedBank)?.name_full || selectedBank}
                 </span>
               </div>
 
               <div className="detail-item">
-                <span className="label">ID заявки:</span>
+                <span className="label">{t('createPaymentModal.requestIdLabel')}</span>
                 <span className="value payment-id">{dataPayment.id}</span>
               </div>
             </div>
 
             <div className="withdrawal-instructions">
-              <p>Ваша заявка на вывод принята и находится в обработке.</p>
-              <p>Деньги будут зачислены на указанную карту в течение 1 часа.</p>
+              <p>{t('createPaymentModal.withdrawalInstructions')}</p>
+              <p>{t('createPaymentModal.withdrawalTime')}</p>
             </div>
 
             <button className="close-card-btn" onClick={handleClose}>
-              Закрыть
+              {t('createPaymentModal.close')}
             </button>
           </div>
         </div>

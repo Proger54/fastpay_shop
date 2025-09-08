@@ -3,19 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 import { fetchApi } from '../../API/api';
+import { useTranslation } from '../../hooks/useTranslation';
 
 import PaginatedTable from '../../Components/PaginatedTable';
 import CreatePaymentModal from '../../Components/CreatePaymentModal';
+import PaymentCardModal from '../../Components/PaymentCardModal';
+import LanguageSelector from '../../Components/LanguageSelector';
 
 const HomePage = () => {
     const [modalCreateVisible, setModalCreateVisible] = useState(false);
     const [modalOutVisible, setModalOutVisible] = useState(false);
+    const [modalPaymentCardVisible, setModalPaymentCardVisible] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState(null);
     const [loadingInfo, setLoadingInfo] = useState(true);
     const [headerData, setHeaderData] = useState(null);
     const [loadingPayment, setLoadingPayment] = useState(true);
     const [paymentData, setPaymentData] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchInfo = async () => {
@@ -114,6 +120,11 @@ const HomePage = () => {
         navigate('/login');
     };
 
+    const handleRowClick = (payment) => {
+        setSelectedPayment(payment);
+        setModalPaymentCardVisible(true);
+    };
+
     return (
         <div className="home-container">
 
@@ -123,9 +134,12 @@ const HomePage = () => {
                 <div className="home-header-left">
                     <h2>{loadingInfo ? localStorage.getItem("sp_name") : headerData?.name}</h2>
                 </div>
-                <button className="logout-btn" onClick={handleLogout}>
-                    Выйти из аккаунта
-                </button>
+                <div className="home-header-right">
+                    <LanguageSelector />
+                    <button className="logout-btn" onClick={handleLogout}>
+                        {t('auth.logout')}
+                    </button>
+                </div>
             </header>
 
             <div className="home-actions">
@@ -136,7 +150,7 @@ const HomePage = () => {
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    Создать платеж
+                    {t('home.createPayment')}
                 </button>
                 <CreatePaymentModal visible={modalCreateVisible} onClose={() => setModalCreateVisible(false)} payIn={true} />
 
@@ -148,16 +162,32 @@ const HomePage = () => {
                         <polyline points="16 17 21 12 16 7" />
                         <line x1="21" y1="12" x2="9" y2="12" />
                     </svg>
-                    Создать вывод
+                    {t('home.createWithdrawal')}
                 </button>
                 <CreatePaymentModal visible={modalOutVisible} onClose={() => setModalOutVisible(false)} payIn={false} />
             </div>
 
             <main className="home-main">
                 {!loadingPayment && (
-                    <PaginatedTable data={paymentData} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                    <PaginatedTable 
+                        data={paymentData} 
+                        currentPage={currentPage} 
+                        setCurrentPage={setCurrentPage}
+                        onRowClick={handleRowClick}
+                    />
                 )}
             </main>
+
+            {modalPaymentCardVisible && selectedPayment && (
+                <PaymentCardModal
+                    dataPayment={selectedPayment}
+                    amount={selectedPayment.amount}
+                    onClose={() => {
+                        setModalPaymentCardVisible(false);
+                        setSelectedPayment(null);
+                    }}
+                />
+            )}
         </div>
     );
 };

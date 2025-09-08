@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import './Components.css';
 
 import CopyNotification from './CopyNotification';
+import { useTranslation } from '../hooks/useTranslation';
 
 import { ReactComponent as CopyIcon } from '../assets/copy-id.svg';
 
-const PaginatedTable = ({ data, itemsPerPage = 5, currentPage, setCurrentPage }) => {
+const PaginatedTable = ({ data, itemsPerPage = 5, currentPage, setCurrentPage, onRowClick }) => {
     const [copied, setCopied] = useState(false);
+    const { t } = useTranslation();
     // const [currentPage, setCurrentPage] = useState(1);
     const totalPages = data?.total_pages;
 
@@ -71,11 +73,11 @@ const PaginatedTable = ({ data, itemsPerPage = 5, currentPage, setCurrentPage })
     const statusText = (status) => {
         switch (status) {
             case "AC":
-                return 'Успешно';
+                return t('payments.statuses.success');
             case "CL":
-                return 'Ошибка';
+                return t('payments.statuses.failed');
             default:
-                return 'Оплата';
+                return t('payments.statuses.pending');
         }
     }
 
@@ -95,17 +97,20 @@ const PaginatedTable = ({ data, itemsPerPage = 5, currentPage, setCurrentPage })
             <table className="styled-table">
                 <thead>
                     <tr>
-                        <th>Номер</th>
-                        <th>Сумма</th>
-                        <th>Статус</th>
+                        <th>{t('payments.number')}</th>
+                        <th>{t('payments.amount')}</th>
+                        <th>{t('payments.status')}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {data?.results.map((item, index) => (
-                        <tr key={index}>
+                        <tr key={index} onClick={() => onRowClick && onRowClick(item)} style={{ cursor: 'pointer' }}>
                             <td className='row-id'>
                                 <p>{truncateString(item.payment_id)}</p>
-                                <div className="areaSvg" onClick={() => copyToClipboard(item.payment_id)}>
+                                <div className="areaSvg" onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyToClipboard(item.payment_id);
+                                }}>
                                     <CopyIcon />
                                 </div>
                             </td>

@@ -26,6 +26,7 @@
     min-height: 100vh;
     padding: 20px;
     color: #ffffff;
+    overflow: visible;
 }
 
 /* Header */
@@ -41,7 +42,7 @@
     box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
     backdrop-filter: blur(6px);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Подсветка снизу хедера */
@@ -80,6 +81,12 @@
     font-weight: 500;
     color: #e0f7fa;
     flex-direction: column;
+}
+
+.home-header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .home-balance {

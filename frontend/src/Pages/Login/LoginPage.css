@@ -8,7 +8,7 @@
     padding: 40px 20px;
     color: white;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     transition: opacity 1s ease;
 }
 
@@ -183,6 +183,13 @@
 .auth-header-svg {
     margin-bottom: 20px;
     text-align: center;
+}
+
+.auth-language-selector {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
 }
 
 .auth-svg-static {

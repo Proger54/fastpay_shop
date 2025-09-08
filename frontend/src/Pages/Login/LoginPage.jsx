@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 import { requestOfficeToken } from '../../API/api';
+import { useTranslation } from '../../hooks/useTranslation';
+import LanguageSelector from '../../Components/LanguageSelector';
 
 import LoginSvg from '../../assets/secure-login.svg';
 
@@ -14,6 +16,7 @@ const LoginPage = () => {
 
     const navigate = useNavigate();
     const inputRefs = useRef([]);
+    const { t } = useTranslation();
 
     const handleCodeChange = (index, value) => {
         if (!/^\d?$/.test(value)) return;
@@ -58,11 +61,15 @@ const LoginPage = () => {
                 <img src={LoginSvg} alt="Secure login" className="auth-svg-static" />
             </div>
 
+            <div className="auth-language-selector">
+                <LanguageSelector />
+            </div>
+
             <form className="auth-form" onSubmit={handleSubmit}>
-                <h1>Вход</h1>
+                <h1>{t('auth.login')}</h1>
 
                 <label>
-                    Секретный ключ
+                    {t('auth.secretKey')}
                     <input
                         type="password"
                         value={secret}
@@ -72,7 +79,7 @@ const LoginPage = () => {
                 </label>
 
                 <label>
-                    2FA Код
+                    {t('auth.twoFactorCode')}
                     <div className="auth-code-inputs">
                         {code.map((digit, index) => (
                             <input
@@ -95,7 +102,7 @@ const LoginPage = () => {
                     {isLoading ? (
                         <span className="auth-loader" />
                     ) : (
-                        'Войти'
+                        t('auth.login')
                     )}
                 </button>
             </form>
