@@ -68,7 +68,7 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
   };
 
   const getCardType = (cardNumber) => {
-    if (!cardNumber) return 'CARD';
+    if (!cardNumber) return 'PAYMENT_URL';
 
     // Убираем все нецифровые символы
     const cleanNumber = cardNumber.replace(/\D/g, '');
@@ -189,14 +189,17 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
               e.stopPropagation();
               copyToClipboard(dataPayment?.reqisite || dataPayment?.card?.card_number, 'card_number');
             }}
+            style={{
+              fontSize: dataPayment?.payment_url ? '16px' : undefined,
+            }}
             title="Кликните для копирования"
           >
-            {dataPayment?.reqisite || dataPayment?.card?.card_number || '**** **** **** ****'}
+            {dataPayment?.reqisite || dataPayment?.card?.card_number || dataPayment?.payment_url ||'**** **** **** ****'}
             {isCopied('card_number') && <span className="copy-indicator">✓ Скопировано!</span>}
           </div>
 
           <div className="card-details">
-            <div
+            {!dataPayment?.payment_url &&(<div
               className={`card-holder ${isCopied('full_name') ? 'copied' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -209,7 +212,7 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
                 {dataPayment?.full_name || dataPayment?.card?.full_name || 'CARD HOLDER'}
                 {isCopied('full_name') && <span className="copy-indicator">✓</span>}
               </span>
-            </div>
+            </div>)}
             <div
               className={`card-expiry ${isCopied('amount') ? 'copied' : ''}`}
               onClick={(e) => {
