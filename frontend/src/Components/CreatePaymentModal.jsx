@@ -97,7 +97,7 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
 
     try {
       if (payIn) {
-        const result = await createPayment({ amount: Number(amount), typePay: "C2C" });
+        const result = await createPayment({ amount: Number(amount), typePay: "IBAN" });
         console.log(result);
         if (result?.payment_id) {
           setDataPayment(result);
