@@ -130,7 +130,7 @@ export const createPayment = async ({ amount, typePay }) => {
         result_url: "https://ya.ru",
         currency: "AED",
         unique: true,
-        ttl: 600,
+        ttl: 900,
     }
     const params = {}
 
