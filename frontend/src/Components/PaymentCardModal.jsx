@@ -178,9 +178,9 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
         <div className="payment-card">
           <div className="card-header">
             <div className="card-bank">{dataPayment?.bank || dataPayment?.card?.bank}</div>
-            <div className={`card-type card-type-${getCardType(dataPayment?.reqisite || dataPayment?.card?.card_number).toLowerCase()}`}>
+            {/* <div className={`card-type card-type-${getCardType(dataPayment?.reqisite || dataPayment?.card?.card_number).toLowerCase()}`}>
               {getCardType(dataPayment?.reqisite || dataPayment?.card?.card_number)}
-            </div>
+            </div> */}
           </div>
 
           <div
