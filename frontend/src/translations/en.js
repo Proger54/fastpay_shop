@@ -191,6 +191,9 @@ export default {
     bankLabel: 'Bank:',
     requestIdLabel: 'Request ID:',
     withdrawalInstructions: 'Your withdrawal request has been accepted and is being processed.',
-    withdrawalTime: 'Money will be credited to the specified card within 1 hour.'
+    withdrawalTime: 'Money will be credited to the specified card within 1 hour.',
+    paymentMethod: 'Payment Method:',
+    selectPaymentMethod: 'Select Payment Method:',
+    allowedMethods: 'Allowed Methods'
   },
 };

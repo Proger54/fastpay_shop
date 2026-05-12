@@ -112,7 +112,7 @@ export const fetchApi = async ({
 };
 
 
-export const createPayment = async ({ amount, typePay }) => {
+export const createPayment = async ({ amount, typePay, currency }) => {
     const token = localStorage.getItem('sp_token');
     const secretKey = localStorage.getItem('sp_secretKey');
     const timestamp = Math.floor(Date.now() / 1000).toString();
@@ -128,7 +128,7 @@ export const createPayment = async ({ amount, typePay }) => {
         amount: amount,
         type_pay: typePay,
         result_url: "https://ya.ru",
-        currency: "AED",
+        currency: currency,
         unique: true,
         ttl: 900,
     }
@@ -199,6 +199,37 @@ export const getBanks = async () => {
 
     const method = "GET";
     const url = "/api/v1/merch/banks?currency=AZN";
+    const data = {}
+    const params = {}
+
+    const response = await axios({
+        method,
+        url,
+        data,
+        params,
+        headers: {
+            'FP-Signature': signature,
+            'FP-Timestamp': timestamp,
+            'FP-Token': token,
+            ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }),
+        },
+    });
+
+    return response.data;
+}
+
+export const getCurrencies = async () => {
+    const token = localStorage.getItem('sp_token');
+    const secretKey = localStorage.getItem('sp_secretKey');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    const dataToSign = `${token}${timestamp}`;
+
+    const crypto = require('crypto-js');
+    const signature = crypto.HmacSHA256(dataToSign, secretKey).toString(crypto.enc.Hex);
+
+    const method = "GET";
+    const url = `/api/v1/dashboard/merchant/${token}/currencies`;
     const data = {}
     const params = {}
 

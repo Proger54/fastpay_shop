@@ -191,6 +191,9 @@ export default {
     bankLabel: 'Bank:',
     requestIdLabel: 'Sorğu ID:',
     withdrawalInstructions: 'Çıxarış sorğunuz qəbul edildi və emal olunur.',
-    withdrawalTime: 'Pul göstərilən karta 1 saat ərzində köçürüləcək.'
+    withdrawalTime: 'Pul göstərilən karta 1 saat ərzində köçürüləcək.',
+    paymentMethod: 'Ödəniş üsulu:',
+    selectPaymentMethod: 'Ödəniş üsulunu seçin:',
+    allowedMethods: 'İcazə verilən üsullar'
   },
 };

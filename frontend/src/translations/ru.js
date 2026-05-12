@@ -191,6 +191,9 @@ export default {
     bankLabel: 'Банк:',
     requestIdLabel: 'ID заявки:',
     withdrawalInstructions: 'Ваша заявка на вывод принята и находится в обработке.',
-    withdrawalTime: 'Деньги будут зачислены на указанную карту в течение 1 часа.'
+    withdrawalTime: 'Деньги будут зачислены на указанную карту в течение 1 часа.',
+    paymentMethod: 'Метод оплаты:',
+    selectPaymentMethod: 'Выберите метод оплаты:',
+    allowedMethods: 'Доступные методы'
   },
 };

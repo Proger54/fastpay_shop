@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Components.css';
 
-import { createPayment, createPayOut, getBanks } from '../API/api';
+import { createPayment, createPayOut, getBanks, fetchApi } from '../API/api';
 import PaymentCardModal from './PaymentCardModal';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -15,6 +15,8 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
   const [dataPayment, setDataPayment] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [allowedMethods, setAllowedMethods] = useState([]);
+  const [selectedMethod, setSelectedMethod] = useState(null);
 
   // Загрузка списка банков (заглушка, замените на реальный API)
   useEffect(() => {
@@ -22,7 +24,17 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
       const result = await getBanks();
       setBanks(result);
     }
+    const fetchAllowedMethods = async () => {
+      const url = `/api/v1/dashboard/merchant/${localStorage.getItem('sp_token')}/allowed`;
+      const result = await fetchApi({ url: url, method: "GET" });
+      setAllowedMethods(result);
+      // Автоматически выбираем, если метод только один
+      if (result && result.length === 1) {
+        setSelectedMethod(result[0]);
+      }
+    }
     fetchBanks();
+    fetchAllowedMethods();
   }, []);
 
   if (!visible) return null;
@@ -97,7 +109,7 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
 
     try {
       if (payIn) {
-        const result = await createPayment({ amount: Number(amount), typePay: "IBAN" });
+        const result = await createPayment({ amount: Number(amount), typePay: selectedMethod?.mode || allowedMethods[0]?.mode, currency: selectedMethod?.currency || allowedMethods[0]?.currency });
         console.log(result);
         if (result?.payment_id) {
           setDataPayment(result);
@@ -134,6 +146,7 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
     setSelectedBank("");
     setDataPayment(null);
     setError(null);
+    setSelectedMethod(null);
     onClose();
   }
 
@@ -144,51 +157,106 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
           <button className="modal-close" onClick={handleClose} aria-label={t('createPaymentModal.close')}>&times;</button>
           <h3>{payIn ? t('createPaymentModal.createPayment') : t('createPaymentModal.createWithdrawal')}</h3>
           <form onSubmit={handleSubmit}>
-            <label>
-              {t('createPaymentModal.amount')}
-              <input
-                type="number"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                placeholder={t('createPaymentModal.enterAmount')}
-                min="0"
-                step="0.01"
-                required
-                autoFocus
-              />
-            </label>
+            <div className="amount-input-container">
+              <label className="amount-label">
+                {t('createPaymentModal.amount')}
+              </label>
+              <div className="amount-input-wrapper">
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  placeholder={t('createPaymentModal.enterAmount')}
+                  min="0"
+                  step="0.01"
+                  required
+                  autoFocus
+                  className="amount-input"
+                />
+                <span className="amount-currency">{selectedMethod?.currency}</span>
+              </div>
+            </div>
+            
+            {payIn && allowedMethods?.length > 0 && (
+              <div className="payment-methods-container">
+                <label className="methods-label">
+                  {allowedMethods.length === 1
+                    ? t('createPaymentModal.paymentMethod')
+                    : t('createPaymentModal.selectPaymentMethod')}
+                </label>
+
+                {allowedMethods.length === 1 ? (
+                  // Если метод один - просто показываем информацию
+                  <div className="single-method-display">
+                    <div className="method-info">
+                      <span className="method-currency">{allowedMethods[0].mode}</span>
+                      <span className="method-name">{allowedMethods[0].currency}</span>
+                    </div>
+                  </div>
+                ) : (
+                  // Если методов несколько - карточки с выбором
+                  <div className="payment-methods-grid">
+                    {allowedMethods.map(method => (
+                      <div
+                        key={method.id}
+                        className={`payment-method-card ${selectedMethod === method.id ? 'selected' : ''
+                          }`}
+                        onClick={() => setSelectedMethod(method)}
+                      >
+                        <div className="method-card-content">
+                          <div className="method-currency">{method.mode}</div>
+                          <div className="method-name">{method.currency}</div>
+                        </div>
+                        {selectedMethod?.id === method.id && (
+                          <div className="method-checkmark">✓</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {!payIn && (
               <div className="withdrawal-fields">
-                <label>
-                  {t('createPaymentModal.cardNumber')}
-                  <input
-                    type="text"
-                    value={cardNumber}
-                    onChange={handleCardNumberChange}
-                    placeholder={t('createPaymentModal.cardPlaceholder')}
-                    maxLength="19"
-                    required
-                    className={cardError ? 'error' : ''}
-                  />
+                <div className="styled-input-container">
+                  <label className="styled-label">
+                    {t('createPaymentModal.cardNumber')}
+                  </label>
+                  <div className={`styled-input-wrapper ${cardError ? 'error' : ''}`}>
+                    <input
+                      type="text"
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      placeholder={t('createPaymentModal.cardPlaceholder')}
+                      maxLength="19"
+                      required
+                      className="styled-input"
+                    />
+                  </div>
                   {cardError && <span className="field-error">{cardError}</span>}
-                </label>
+                </div>
 
-                <label>
-                  {t('createPaymentModal.bank')}
-                  <select
-                    value={selectedBank}
-                    onChange={e => setSelectedBank(e.target.value)}
-                    required
-                  >
-                    <option value="">{t('createPaymentModal.selectBank')}</option>
-                    {banks?.banks?.map(bank => (
-                      <option key={bank.name} value={bank.name}>
-                        {bank.name_full}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="styled-input-container">
+                  <label className="styled-label">
+                    {t('createPaymentModal.bank')}
+                  </label>
+                  <div className="styled-input-wrapper">
+                    <select
+                      value={selectedBank}
+                      onChange={e => setSelectedBank(e.target.value)}
+                      required
+                      className="styled-select"
+                    >
+                      <option value="">{t('createPaymentModal.selectBank')}</option>
+                      {banks?.banks?.map(bank => (
+                        <option key={bank.name} value={bank.name}>
+                          {bank.name_full}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -197,7 +265,7 @@ export default function CreatePaymentModal({ visible, onClose, payIn }) {
                 {error}
               </div>
             )}
-            <button type="submit" className="action-button" disabled={loading}>
+            <button type="submit" className="modal-submit-button" disabled={loading}>
               {loading ? (
                 <span className="loading-spinner loading-spinner-large"></span>
               ) : (
