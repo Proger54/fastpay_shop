@@ -59,7 +59,7 @@ const HomePage = () => {
         }
 
         fetchPayment();
-    }, [currentPage, modalCreateVisible])
+    }, [currentPage, modalCreateVisible, selectedPayment])
 
     useEffect(() => {
         const canvas = document.querySelector(".stars-bg-canvas");

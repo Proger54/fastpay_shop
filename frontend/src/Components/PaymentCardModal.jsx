@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Components.css';
 
-import { checkPaymentStatus } from '../API/api';
+import { checkPaymentStatus, declinePayment } from '../API/api';
 import { useTranslation } from '../hooks/useTranslation';
 
 const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
@@ -10,6 +10,7 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isExpired, setIsExpired] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const { t } = useTranslation();
 
   // Расчет времени до истечения на основе expire и last_update
@@ -172,6 +173,17 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
     }
   };
 
+
+  const canDecline = (status) => {
+    return status !== 'Approve' && status !== 'AC' && status !== 'Cancel' && status !== 'CL';
+  }
+
+  const declinePaymentHandler = async () => {
+    const result = await declinePayment({ payment_id: dataPayment.payment_id });
+    console.log(result);
+    onClose();
+  }
+
   return (
     <div className="payment-card-modal-overlay">
       <div className="payment-card-modal-content">
@@ -194,7 +206,7 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
             }}
             title="Кликните для копирования"
           >
-            {dataPayment?.reqisite || dataPayment?.card?.card_number || dataPayment?.payment_url ||'**** **** **** ****'}
+            {dataPayment?.reqisite || dataPayment?.card?.card_number || dataPayment?.card?.phone_number || dataPayment?.card?.payment_number || dataPayment?.payment_url ||'**** **** **** ****'}
             {isCopied('card_number') && <span className="copy-indicator">✓ Скопировано!</span>}
           </div>
 
@@ -277,24 +289,45 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
         <div className="card-instructions">
           <p>{t('modals.paymentCard.clickToCopy')}</p>
           <div className="action-buttons card-buttons">
-            <button
-              className="check-status-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                checkStatus();
-              }}
-              disabled={isCheckingStatus}
-            >
-              {isCheckingStatus ? (
-                <span className="loading-spinner"></span>
-              ) : (
-                t('modals.paymentCard.checkStatus')
-              )}
-            </button>
-            <button className="close-card-btn" onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}>{t('modals.paymentCard.close')}</button>
+            {!showConfirmation ? (
+              <>
+                <button
+                  className="check-status-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    checkStatus();
+                  }}
+                  disabled={isCheckingStatus}
+                >
+                  {isCheckingStatus ? (
+                    <span className="loading-spinner"></span>
+                  ) : (
+                    t('modals.paymentCard.checkStatus')
+                  )}
+                </button>
+                {canDecline(paymentStatus) && (
+                  <button className="close-card-btn" onClick={(e) => {
+                    e.stopPropagation();
+                    setShowConfirmation(true);
+                  }}>{t('modals.paymentCard.decline')}</button>
+                )}
+                <button className="close-card-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}>{t('modals.paymentCard.close')}</button>
+              </>
+            ) : (
+              <>
+                <button className="check-status-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  setShowConfirmation(false);
+                }}>{t('modals.paymentCard.no')}</button>
+                <button className="close-card-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  declinePaymentHandler();
+                }}>{t('modals.paymentCard.yes')}</button>
+              </>
+            )}
           </div>
         </div>
       </div>

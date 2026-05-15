@@ -279,5 +279,36 @@ export const checkPaymentStatus = async ({ payment_id }) => {
     });
 
     return response.data;
+}
 
+
+export const declinePayment = async ({ payment_id }) => {
+    const token = localStorage.getItem('sp_token');
+    const secretKey = localStorage.getItem('sp_secretKey');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    const dataToSign = `${token}${timestamp}`;
+
+    const crypto = require('crypto-js');
+    const signature = crypto.HmacSHA256(dataToSign, secretKey).toString(crypto.enc.Hex);
+
+    const method = "POST";
+    const url = "/api/v1/merch/cancel/payin";
+    const data = {payment_id: payment_id}
+    const params = {}
+
+    const response = await axios({
+        method,
+        url,
+        data,
+        params,
+        headers: {
+            'FP-Signature': signature,
+            'FP-Timestamp': timestamp,
+            'FP-Token': token,
+            ...((method === 'POST' || method === "PUT") && { 'Content-Type': 'application/json' }),
+        },
+    });
+
+    return response.data;
 }

@@ -119,8 +119,11 @@ export default {
       expired: 'Vaxtı bitib',
       noData: 'Məlumat yoxdur',
       checkStatus: 'Statusu yoxla',
+      decline: 'Ləğv et',
       close: 'Bağla',
       clickToCopy: 'Kopyalamaq üçün hər hansı mətnə klikləyin',
+      yes: 'Bəli',
+      no: 'Xeyr',
     },
   },
 

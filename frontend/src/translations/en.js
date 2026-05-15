@@ -119,8 +119,11 @@ export default {
       expired: 'Expired',
       noData: 'No data',
       checkStatus: 'Check Status',
+      decline: 'Decline',
       close: 'Close',
       clickToCopy: 'Click on any text to copy',
+      yes: 'Yes',
+      no: 'No',
     },
   },
 
