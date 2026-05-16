@@ -199,7 +199,7 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
             className={`card-number ${isCopied('card_number') ? 'copied' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
-              copyToClipboard(dataPayment?.reqisite || dataPayment?.card?.card_number, 'card_number');
+              copyToClipboard(dataPayment?.reqisite || dataPayment?.payment_url || dataPayment?.card?.card_number, 'card_number');
             }}
             style={{
               fontSize: dataPayment?.payment_url ? '16px' : undefined,
