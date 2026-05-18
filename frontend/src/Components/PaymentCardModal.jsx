@@ -206,7 +206,7 @@ const PaymentCardModal = ({ dataPayment, amount, onClose }) => {
             }}
             title="Кликните для копирования"
           >
-            {dataPayment?.reqisite || dataPayment?.card?.card_number || dataPayment?.card?.phone_number || dataPayment?.card?.payment_number || dataPayment?.payment_url ||'**** **** **** ****'}
+            {dataPayment?.payment_url || dataPayment?.reqisite || dataPayment?.card?.card_number || dataPayment?.card?.phone_number || dataPayment?.card?.payment_number || dataPayment?.payment_url ||'**** **** **** ****'}
             {isCopied('card_number') && <span className="copy-indicator">✓ Скопировано!</span>}
           </div>
 
